@@ -2,6 +2,7 @@ const { startSession } = require("mongoose");
 
 const PlaceType = require("../models/placeType.model");
 const Place = require("../models/place.model");
+const User = require("../models/user.model");
 
 const result = {
   placeTypes: false,
@@ -141,12 +142,10 @@ exports.createPlace = async (req, res) => {
     // ending the session
     session.endSession();
   }
-  return res
-    .status(500)
-    .json({
-      place: false,
-      message: "Something bad happened, please try again",
-    });
+  return res.status(500).json({
+    place: false,
+    message: "Something bad happened, please try again",
+  });
 };
 
 exports.getPlaces = (req, res) => {
@@ -198,12 +197,10 @@ exports.getUserPlaces = (req, res) => {
     .populate({ path: "places", populate: "type" })
     .then((user) => {
       if (!user)
-        return res
-          .status(404)
-          .json({
-            place: false,
-            message: `User with the id: ${id} doesn't exist`,
-          });
+        return res.status(404).json({
+          place: false,
+          message: `User with the id: ${id} doesn't exist`,
+        });
       res.json({
         ...result,
         places: user.places,
@@ -248,12 +245,10 @@ exports.getPlaceById = (req, res) => {
     .populate("type")
     .then((place) => {
       if (!place)
-        return res
-          .status(404)
-          .json({
-            place: false,
-            message: `The place with the id: ${id} doesn't exist`,
-          });
+        return res.status(404).json({
+          place: false,
+          message: `The place with the id: ${id} doesn't exist`,
+        });
       return res.json({
         place: place,
         message: `Place with id: ${id} successfully fetched`,
@@ -277,13 +272,11 @@ exports.updatePlace = (req, res) => {
         .status(500)
         .send({ updated: false, place: false, message: err });
     if (!data)
-      return res
-        .status(404)
-        .send({
-          updated: false,
-          place: false,
-          message: `Place with id: ${id} doesn't exist`,
-        });
+      return res.status(404).send({
+        updated: false,
+        place: false,
+        message: `Place with id: ${id} doesn't exist`,
+      });
     return res.json({
       updated: true,
       place: data,
@@ -307,12 +300,10 @@ exports.deletePlace = async (req, res) => {
   try {
     const deletedPlace = await Place.findByIdAndDelete([id], { session });
     if (!deletedPlace)
-      return res
-        .status(404)
-        .send({
-          deleted: false,
-          message: `Place with id: ${id} doesn't exist`,
-        });
+      return res.status(404).send({
+        deleted: false,
+        message: `Place with id: ${id} doesn't exist`,
+      });
     await User.findByIdAndUpdate(
       [deletedPlace.owner],
       { $pull: { places: deletedPlace._id } },
@@ -330,10 +321,8 @@ exports.deletePlace = async (req, res) => {
     // ending the session
     session.endSession();
   }
-  return res
-    .status(500)
-    .json({
-      place: false,
-      message: "Something bad happened, please try again",
-    });
+  return res.status(500).json({
+    place: false,
+    message: "Something bad happened, please try again",
+  });
 };
